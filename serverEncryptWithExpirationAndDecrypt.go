@@ -52,7 +52,7 @@ const TOTAL_MEDIA_FOLDERS = 2     // make sure you make the list of folders belo
 const MEDIA_REFRESH_INTERVAL = 60*60 // in Seconds - for 1 minute use 60, for 1 hour use 60*60, recommended is 1 day, so it is not done many times, and someone may use direct link 1 day only, until it is expired - should be ok.
 //const EXPIRATION_TIME = time.Now().UTC().Add(time.Hour*0 + time.Minute*1 + time.Second*0).Unix()    // did work so see the function for the value
 const PORT = ":9000"
-const BASEFOLDER = "/home/cloud9/solfeggio/goServer/public/"
+const BASEFOLDER = "/home/cloud9/sio/goServer/public/"
 
 const FOLDER_SELECT_DIRECTIVE = 1 //See 1 2 or 3 below
 
@@ -221,7 +221,7 @@ func checkPassPhraseThenStreamMediaHandler(w http.ResponseWriter, r *http.Reques
 
 func logMediaPlayed(w http.ResponseWriter, r *http.Request, ps httprouter.Params, filename string) {
 
-	sa := option.WithCredentialsFile(BASEFOLDER + "../config/solfegg-io-firebase-adminsdk-oqa9s-d34c6f7b32.json")
+	sa := option.WithCredentialsFile(BASEFOLDER + "../config/sio-firebase-adminsdk-oqa9s-d34c6f7b32.json")
 
 	app, err := firebase.NewApp(context.Background(), nil, sa)
 	if err != nil {
@@ -235,7 +235,7 @@ func logMediaPlayed(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 
 	defer client.Close()
 	
-	_, _, err = client.Collection("solfeggio_prod_activity").Add(context.Background(), map[string]interface{}{
+	_, _, err = client.Collection("sio_prod_activity").Add(context.Background(), map[string]interface{}{
 		"file":    filename,
 		"ip":      r.Header.Get("X-FORWARDED-FOR"), //r.RemoteAddr, WORKING in DB Insert
 		"created": time.Now(),
@@ -361,7 +361,7 @@ func encryptDBFileNamesWithExpirationLogic(w http.ResponseWriter, r *http.Reques
 
 	//encryptedfilename := ps.ByName("encryptedfilename") // no filename is sent - we are doing all files on firestore table/encrypted column
 	// Use a service account
-	sa := option.WithCredentialsFile(BASEFOLDER + "../config/solfegg-io-firebase-adminsdk-oqa9s-d34c6f7b32.json")
+	sa := option.WithCredentialsFile(BASEFOLDER + "../config/sio-firebase-adminsdk-oqa9s-d34c6f7b32.json")
 
 	app, err := firebase.NewApp(context.Background(), nil, sa)
 	if err != nil {
@@ -405,7 +405,7 @@ func encryptDBFileNamesWithExpirationLogic(w http.ResponseWriter, r *http.Reques
 	} else if r.Method == "POST" || r.Method == "GET" {
    fmt.Fprint(w, "Encrypting filenames\n")
    fmt.Println("Encrypting filenames\n")
-   iter := client.Collection("solfeggio_prod_master").Documents(context.Background())
+   iter := client.Collection("sio_prod_master").Documents(context.Background())
    for {
         doc, err := iter.Next()
         if err == iterator.Done {
@@ -435,7 +435,7 @@ func encryptDBFileNamesWithExpirationLogic(w http.ResponseWriter, r *http.Reques
         //_, err = ca.Update(ctx, []firestore.Update{{Path: "capital", Value: "Sacramento"}})
         
 					//updating the efilename after encrypting
-					_, err = client.Collection("solfeggio_prod_master").Doc(fmt.Sprint(id)).Set(context.Background(), map[string]interface{}{
+					_, err = client.Collection("sio_prod_master").Doc(fmt.Sprint(id)).Set(context.Background(), map[string]interface{}{
 					        "efilename": efilename,
 					}, firestore.MergeAll)
 					
@@ -452,7 +452,7 @@ func reorderDocumentsRandomly(w http.ResponseWriter, r *http.Request, ps httprou
    fmt.Println("Reordering records")
    fmt.Fprint(w, "Reordering records\n")
 
-	sa := option.WithCredentialsFile(BASEFOLDER + "../config/solfegg-io-firebase-adminsdk-oqa9s-d34c6f7b32.json")
+	sa := option.WithCredentialsFile(BASEFOLDER + "../config/sio-firebase-adminsdk-oqa9s-d34c6f7b32.json")
 
 	app, err := firebase.NewApp(context.Background(), nil, sa)
 	if err != nil {
@@ -466,7 +466,7 @@ func reorderDocumentsRandomly(w http.ResponseWriter, r *http.Request, ps httprou
 
 	defer client.Close()
 
-   iter := client.Collection("solfeggio_prod_master").Documents(context.Background())
+   iter := client.Collection("sio_prod_master").Documents(context.Background())
    for {
         doc, err := iter.Next()
         if err == iterator.Done {
@@ -480,7 +480,7 @@ func reorderDocumentsRandomly(w http.ResponseWriter, r *http.Request, ps httprou
                     //orderseq := doc.Data()["orderseq"] // in case you need to use it
                     randomnumber := randInt(0, 99999999) 
 					//updating the efilename after encrypting
-					_, err = client.Collection("solfeggio_prod_master").Doc(fmt.Sprint(id)).Set(context.Background(), map[string]interface{}{
+					_, err = client.Collection("sio_prod_master").Doc(fmt.Sprint(id)).Set(context.Background(), map[string]interface{}{
 					        "orderseq": randomnumber,
 					}, firestore.MergeAll)
 					
@@ -493,7 +493,7 @@ func reorderDocumentsRandomly(w http.ResponseWriter, r *http.Request, ps httprou
 
 func readFolderAddDBRecords(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	
-			sa := option.WithCredentialsFile(BASEFOLDER + "../config/solfegg-io-firebase-adminsdk-oqa9s-d34c6f7b32.json")
+			sa := option.WithCredentialsFile(BASEFOLDER + "../config/sio-firebase-adminsdk-oqa9s-d34c6f7b32.json")
 			app, err1 := firebase.NewApp(context.Background(), nil, sa)
 			if err1 != nil {
 				log.Fatalln(err1)
@@ -510,7 +510,7 @@ func readFolderAddDBRecords(w http.ResponseWriter, r *http.Request, ps httproute
 			err := errors.New("Just to declare, to be used below")
 			err = nil
 			// upload one folder at a time
-			FOLDER2BADDED := "media/solfeggio/*"   // the * is important - it means read ALL file names from the folder and store list in the variable.
+			FOLDER2BADDED := "media/sio/*"   // the * is important - it means read ALL file names from the folder and store list in the variable.
 		//	FOLDER2BADDED := "media/meditation/*"  // the * is important - it means read ALL file names from the folder and store list in the variable. 
 			fullname := BASEFOLDER+FOLDER2BADDED   
 			listfilesinfolder, err = filepath.Glob(fullname)
@@ -533,7 +533,7 @@ func readFolderAddDBRecords(w http.ResponseWriter, r *http.Request, ps httproute
 		        fmt.Fprint(w, justfilename)					
 				fmt.Fprint(w, "\n")
 				
-				//get the final folder, use it as the default for the music classification (Example: meditation, solfeggio, etc - refine later if required)
+				//get the final folder, use it as the default for the music classification (Example: meditation, sio, etc - refine later if required)
 				classification := parts[len(parts)-2]   // second to last segment is the final folder name
 		        fmt.Fprint(w, classification)					
 				fmt.Fprint(w, "\n")
@@ -571,7 +571,7 @@ func readFolderAddDBRecords(w http.ResponseWriter, r *http.Request, ps httproute
 				// Important note: why are we duplicating the firestore id to a field: workaroundgoid
 				// this is because when selecting all documents in loop, the id is not selected (and snapshot logic does not work currently in go)
 				// need the id to update some fields in the same loop - say the encrypted file name is updated periodically
-				 _, err = client.Collection("solfeggio_prod_master").Doc(uuid).Set(context.Background(), map[string]interface{}{
+				 _, err = client.Collection("sio_prod_master").Doc(uuid).Set(context.Background(), map[string]interface{}{
 					"workaroundgoid": uuid,
 					"filename": justfilename,
 					"filenamewithpath": filenamewithtoplevelfolders,
@@ -588,7 +588,7 @@ func readFolderAddDBRecords(w http.ResponseWriter, r *http.Request, ps httproute
 				}
 
 				// Leave this here - commented, the issue was that could not use the custom ID to add new record, the above logic was successful 
-				// _, _, err = client.Collection("solfeggio_prod_master").Add(context.Background(), map[string]interface{}{
+				// _, _, err = client.Collection("sio_prod_master").Add(context.Background(), map[string]interface{}{
 				// 	"workaroundgoid": uuid,
 				// 	"filename": justfilename,
 				// 	"filenamewithpath": filenamewithtoplevelfolders,
