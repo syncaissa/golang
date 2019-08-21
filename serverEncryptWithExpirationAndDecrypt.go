@@ -1,9 +1,9 @@
 package main
 
-// http://52.202.244.43/addfilesfromfolder   // to add folder both GET and API
-// http://52.202.244.43/reorderfiles   // to reorder files in the DB both GET and API for random order for users each time
-// http://52.202.244.43/encryptfilenames // to encrypt filenames with expiration both GET and API
-// http://52.202.244.43/media/7xyAilja...   // to server mp3s
+// http://12.345.678/addfilesfromfolder   // to add folder both GET and API
+// http://12.345.678/reorderfiles   // to reorder files in the DB both GET and API for random order for users each time
+// http://12.345.678/encryptfilenames // to encrypt filenames with expiration both GET and API
+// http://12.345.678/media/7xyAilja...   // to server mp3s
 
 // Key words:
 //golang mp3 server, logic to encrypt filenames, add new mp3/wav files from system folder location, reorder files for random listening  - works!!!!
